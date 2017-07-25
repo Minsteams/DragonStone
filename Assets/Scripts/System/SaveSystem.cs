@@ -82,4 +82,18 @@ public class SaveSystem : MonoBehaviour
         Marshal.FreeHGlobal(structPtr);
         return obj;
     }
+    /// <summary>
+    /// 记录游戏数据并打包至SaveData
+    /// </summary>
+    static private void PackData()
+    {
+
+    }
+    /// <summary>
+    /// 将读取的数据应用到游戏
+    /// </summary>
+    static private void ApplyData()
+    {
+
+    }
 }

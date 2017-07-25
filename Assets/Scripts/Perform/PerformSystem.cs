@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// 演出系统
-/// <para>包括摄像机控制,音效控制等</para>
+/// <para>包括摄像机控制,音效控制，物体淡入淡出，场景切换等</para>
 /// </summary>
 public class PerformSystem : MonoBehaviour
 {
@@ -32,16 +32,28 @@ public class PerformSystem : MonoBehaviour
     /// <summary>
     /// 已有音效表列
     /// </summary>
-    static public List<sound> soundList = null;
-
+    static private List<sound> soundList = null;
+    /// <summary>
+    /// 黑幕样例
+    /// </summary>
+    static public GameObject blackBoard;
+    /// <summary>
+    /// 当前存在的黑幕
+    /// </summary>
+    static private GameObject currentBlackBoard;
 
 
     /************************
      *   以下是初始化方法   *
      ************************/
-    [RuntimeInitializeOnLoadMethod]//指定在游戏开始时运行
-    static private void InitGame()
+    /// <summary>
+    /// 演出初始化
+    /// </summary>
+    static public void PerformInit()
     {
+        blackBoard = GameObject.FindGameObjectWithTag("GameSystem").GetComponent<GameSystem>().blackBoard;
+        float height = mainCamera.GetComponent<Camera>().orthographicSize * 100 * 2;
+        blackBoard.transform.localScale = new Vector3(height * Screen.width / Screen.height, height, 1);
         Debug.Log("游戏开始啦!");
     }
 
@@ -58,7 +70,13 @@ public class PerformSystem : MonoBehaviour
         }
         return audioToReturn;
     }
-    static private IEnumerator PLayAndDestroyAudioDelayed(AudioSource toDestroy, float seconds)
+    /// <summary>
+    /// 延迟销毁某物体
+    /// </summary>
+    /// <param name="toDestroy">目标</param>
+    /// <param name="seconds">延迟的时间</param>
+    /// <returns></returns>
+    static private IEnumerator DestroyDelayed(Object toDestroy, float seconds)
     {
         yield return new WaitForSeconds(seconds);
         Destroy(toDestroy);
@@ -103,7 +121,7 @@ public class PerformSystem : MonoBehaviour
         if (NameToAudioClip(name) == null) soundList.Add(new sound(name, audio));
     }
     /// <summary>
-    /// 根据名字播放声音
+    /// 根据音效名字播放声音
     /// </summary>
     /// <param name="soundName">声音名字</param>
     static public void Play(string soundName)
@@ -113,7 +131,8 @@ public class PerformSystem : MonoBehaviour
         if (audio == null) return;
         AudioSource tempAudioSource = mainCamera.gameObject.AddComponent<AudioSource>();
         tempAudioSource.clip = audio;
-        mainCamera.StartCoroutine(PLayAndDestroyAudioDelayed(tempAudioSource, audio.length));
+        tempAudioSource.Play();
+        mainCamera.StartCoroutine(DestroyDelayed(tempAudioSource, audio.length));
     }
     /// <summary>
     /// 播放声音
@@ -124,6 +143,63 @@ public class PerformSystem : MonoBehaviour
         if (audio == null) return;
         AudioSource tempAudioSource = mainCamera.gameObject.AddComponent<AudioSource>();
         tempAudioSource.clip = audio;
-        mainCamera.StartCoroutine(PLayAndDestroyAudioDelayed(tempAudioSource, audio.length));
+        mainCamera.StartCoroutine(DestroyDelayed(tempAudioSource, audio.length));
+    }
+    /// <summary>
+    /// 使一个带spriteRenderer的物体以淡入的形式出现
+    /// </summary>
+    /// <param name="target">物体</param>
+    /// <param name="seconds">淡出经历时间【可选】</param>
+    static public void FadeIn(GameObject target, float seconds = 0.4f)
+    {
+        Fade f= target.AddComponent<Fade>();
+        f.FadeIn(seconds);
+    }
+    /// <summary>
+    /// 使一个带spriteRenderer的物体淡出并摧毁
+    /// </summary>
+    /// <param name="target">物体</param>
+    /// <param name="seconds">淡出经历时间【可选】</param>
+    static public void FadeOut(GameObject target, float seconds = 0.4f)
+    {
+        Fade f = target.AddComponent<Fade>();
+        f.FadeOut(seconds);
+        mainCamera.StartCoroutine(DestroyDelayed(target, seconds + 0.1f));
+    }
+    /// <summary>
+    /// 使一个带spriteRenderer的物体淡出但不摧毁
+    /// </summary>
+    /// <param name="target">物体</param>
+    /// <param name="seconds">淡出经历时间【可选】</param>
+    static public void Hide(GameObject target, float seconds = 0.4f)
+    {
+        Fade f = target.AddComponent<Fade>();
+        f.FadeOut(seconds);
+    }
+    /// <summary>
+    /// 全屏淡入
+    /// </summary>
+    /// <param name="seconds"></param>
+    static public void FadeIn(float seconds = 1.5f)
+    {
+        if (currentBlackBoard == null)currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity);
+        FadeOut(currentBlackBoard, seconds);
+    }
+    /// <summary>
+    /// 全屏淡出
+    /// </summary>
+    /// <param name="seconds"></param>
+    static public void FadeOut(float seconds = 1.5f)
+    {
+        if (currentBlackBoard != null) return;
+        currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity);
+        FadeIn(currentBlackBoard, seconds);
+        mainCamera.StartCoroutine(DestroyDelayed(currentBlackBoard, seconds + 0.1f));
+    }
+    static public void Hide(float seconds = 1.5f)
+    {
+        if (currentBlackBoard != null) return;
+        currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity);
+        FadeIn(currentBlackBoard, seconds);
     }
 }

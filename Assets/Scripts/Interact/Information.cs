@@ -32,7 +32,7 @@ public class Information : MonoBehaviour
 
     private void OnMouseOver()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0)&&GameSystem.gameStatus!=GameSystem.status.pause)
         {
             if (点击时播放音效)
             {
