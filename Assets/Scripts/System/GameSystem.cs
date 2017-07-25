@@ -36,6 +36,10 @@ public class GameSystem : MonoBehaviour
     [ContextMenu("Init")]//不知道为啥这个指令没用，也许是静态的原因
     static void GameInit()
     {
+        
+    }
+    private void Start()
+    {
         PerformSystem.PerformInit();//初始化演出
     }
 
@@ -44,7 +48,7 @@ public class GameSystem : MonoBehaviour
     /************************
      *    以下是测试方法    *
      ************************/
-     [ContextMenu("FadeIn")]
+    [ContextMenu("FadeIn")]
     void FadeIn()
     {
         PerformSystem.FadeIn();

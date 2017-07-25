@@ -52,8 +52,8 @@ public class PerformSystem : MonoBehaviour
     static public void PerformInit()
     {
         blackBoard = GameObject.FindGameObjectWithTag("GameSystem").GetComponent<GameSystem>().blackBoard;
-        float height = mainCamera.GetComponent<Camera>().orthographicSize * 100 * 2;
-        blackBoard.transform.localScale = new Vector3(height * Screen.width / Screen.height, height, 1);
+        float heightScale = mainCamera.GetComponent<Camera>().orthographicSize * 100 * 2;
+        blackBoard.transform.localScale = new Vector3(heightScale * Screen.width / Screen.height, heightScale, 1);
         Debug.Log("游戏开始啦!");
     }
 
@@ -61,6 +61,11 @@ public class PerformSystem : MonoBehaviour
     /************************
      * 以下是内部的静态方法 *
      ************************/
+    /// <summary>
+    /// 通过名字查找音效切片
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
     static private AudioClip NameToAudioClip(string name)
     {
         AudioClip audioToReturn = null;
@@ -116,7 +121,7 @@ public class PerformSystem : MonoBehaviour
     /// <summary>
     /// 用于添加音效
     /// </summary>
-    static public void AddSound(string name,AudioClip audio)
+    static public void AddSound(string name, AudioClip audio)
     {
         if (NameToAudioClip(name) == null) soundList.Add(new sound(name, audio));
     }
@@ -150,56 +155,84 @@ public class PerformSystem : MonoBehaviour
     /// </summary>
     /// <param name="target">物体</param>
     /// <param name="seconds">淡出经历时间【可选】</param>
-    static public void FadeIn(GameObject target, float seconds = 0.4f)
+    static public float FadeIn(GameObject target, float seconds = 0.4f)
     {
-        Fade f= target.AddComponent<Fade>();
+        Fade fo = target.GetComponent<Fade>();
+        if (fo != null) Destroy(fo);
+        Fade f = target.AddComponent<Fade>();
+        f = target.AddComponent<Fade>();
         f.FadeIn(seconds);
+        return seconds;
     }
     /// <summary>
     /// 使一个带spriteRenderer的物体淡出并摧毁
     /// </summary>
     /// <param name="target">物体</param>
     /// <param name="seconds">淡出经历时间【可选】</param>
-    static public void FadeOut(GameObject target, float seconds = 0.4f)
+    static public float FadeOut(GameObject target, float seconds = 0.4f)
     {
+        Fade fo = target.GetComponent<Fade>();
+        if (fo != null) Destroy(fo);
         Fade f = target.AddComponent<Fade>();
         f.FadeOut(seconds);
         mainCamera.StartCoroutine(DestroyDelayed(target, seconds + 0.1f));
+        return seconds;
     }
     /// <summary>
     /// 使一个带spriteRenderer的物体淡出但不摧毁
     /// </summary>
     /// <param name="target">物体</param>
     /// <param name="seconds">淡出经历时间【可选】</param>
-    static public void Hide(GameObject target, float seconds = 0.4f)
+    static public float Hide(GameObject target, float seconds = 0.4f)
     {
+        Fade fo = target.GetComponent<Fade>();
+        if (fo != null) Destroy(fo);
         Fade f = target.AddComponent<Fade>();
         f.FadeOut(seconds);
+        return seconds;
     }
     /// <summary>
     /// 全屏淡入
     /// </summary>
     /// <param name="seconds"></param>
-    static public void FadeIn(float seconds = 1.5f)
+    static public float FadeIn(float seconds = 0.8f)
     {
-        if (currentBlackBoard == null)currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity);
+        if (currentBlackBoard == null) currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity, mainCamera.transform);
         FadeOut(currentBlackBoard, seconds);
+        return seconds;
     }
     /// <summary>
     /// 全屏淡出
     /// </summary>
     /// <param name="seconds"></param>
-    static public void FadeOut(float seconds = 1.5f)
+    static public float FadeOut(float seconds = 0.8f)
     {
-        if (currentBlackBoard != null) return;
-        currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity);
+        if (currentBlackBoard != null) Destroy(currentBlackBoard);
+        currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity, mainCamera.transform);
         FadeIn(currentBlackBoard, seconds);
         mainCamera.StartCoroutine(DestroyDelayed(currentBlackBoard, seconds + 0.1f));
+        return seconds;
     }
-    static public void Hide(float seconds = 1.5f)
+    /// <summary>
+    /// 全屏淡出&保留黑幕
+    /// </summary>
+    /// <param name="seconds"></param>
+    static public float Hide(float seconds = 0.8f)
     {
-        if (currentBlackBoard != null) return;
-        currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity);
+        if (currentBlackBoard != null) Destroy(currentBlackBoard);
+        currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity, mainCamera.transform);
         FadeIn(currentBlackBoard, seconds);
+        return seconds;
+    }
+    /// <summary>
+    /// 从某一场景切换到另一个
+    /// </summary>
+    /// <param name="from"></param>
+    /// <param name="to"></param>
+    static public void LoadSceneFromTo(string from, string to)
+    {
+        SceneLoader.toUnload = from;
+        SceneLoader.toLoad = to;
+        SceneLoader.Load();
     }
 }

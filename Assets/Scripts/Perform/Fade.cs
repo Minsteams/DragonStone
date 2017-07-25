@@ -5,7 +5,6 @@ using UnityEngine;
 /// <summary>
 /// 被控制地加于任何物体上并控制淡入淡出效果
 /// </summary>
-[DisallowMultipleComponent]
 [ExecuteInEditMode]
 public class Fade : MonoBehaviour
 {
