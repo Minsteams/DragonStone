@@ -1,13 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
-/// 被控制地加于任何物体上并控制淡入淡出效果
+/// 被控制地加于文字并控制淡入淡出效果
 /// </summary>
 [ExecuteInEditMode]
-[AddComponentMenu("演出/Fade")]
-public class Fade : MonoBehaviour
+[AddComponentMenu("演出/TextFade")]
+public class TextFade : MonoBehaviour
 {
     float fadeSeconds = 0.4f;
     bool isFading = false;
@@ -15,9 +16,8 @@ public class Fade : MonoBehaviour
     bool isOver = false;
     float time = 0;
     float originalAlpha = 1;
-    string colorName = "_Color";
     Color c;
-    
+
     void Update()
     {
         if (isFading)
@@ -30,7 +30,7 @@ public class Fade : MonoBehaviour
                 isOver = true;
             }
             c.a = originalAlpha * (ifFadeIn ? bili : 1 - bili);
-            GetComponent<Renderer>().material.SetColor(colorName, c);
+            GetComponent<Text>().color = c;
             if (isOver) Destroy(this);
         }
     }
@@ -39,7 +39,7 @@ public class Fade : MonoBehaviour
         fadeSeconds = seconds;
         FadeInit(true);
         c.a = 0;
-        GetComponent<Renderer>().material.SetColor(colorName, c);
+        GetComponent<Text>().color = c;
     }
     public void FadeOut(float seconds)
     {
@@ -49,9 +49,14 @@ public class Fade : MonoBehaviour
     void FadeInit(bool ifIn)
     {
         ifFadeIn = ifIn;
-        c = GetComponent<Renderer>().material.GetColor(colorName);
+        c = GetComponent<Text>().color;
         originalAlpha = c.a;
         time = 0;
         isFading = true;
+    }
+    [ContextMenu("Test")]
+    void FadeTest()
+    {
+        FadeOut(2);
     }
 }

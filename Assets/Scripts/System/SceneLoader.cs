@@ -19,7 +19,7 @@ public class SceneLoader : MonoBehaviour {
     /// <summary>
     /// 是否加载完成
     /// </summary>
-    static bool isLoaded = false;
+    static public bool isLoaded = false;
     /// <summary>
     /// 准备退出的场景
     /// </summary>
@@ -64,8 +64,8 @@ public class SceneLoader : MonoBehaviour {
         yield return new WaitForSeconds(seconds);
         //淡出完毕,淡入
         PerformSystem.FocusOn(0, 0);
-        if(SceneManager.GetSceneByName(toUnload)!=null) loadingProgress = SceneManager.UnloadSceneAsync(toUnload);
-        if (SceneManager.GetSceneByName(toLoad) != null) loadingProgress = SceneManager.LoadSceneAsync(toLoad,LoadSceneMode.Additive);
+        if (SceneManager.GetSceneByName(toUnload).IsValid()) SceneManager.UnloadSceneAsync(toUnload);
+        loadingProgress = SceneManager.LoadSceneAsync(toLoad,LoadSceneMode.Additive);
         BackGround.SetActive(true);
         StartCoroutine(Loading());
         seconds = PerformSystem.FadeIn();
@@ -79,7 +79,7 @@ public class SceneLoader : MonoBehaviour {
         if (progress > fakeProgress)
         {
             progress = fakeProgress;
-            fakeProgress += 0.01f;
+            fakeProgress += 0.015f;
         }
         print("Loading......"+ progress * 100 +"%");
         //循环检测loading进度
@@ -110,7 +110,7 @@ public class SceneLoader : MonoBehaviour {
     {
         //淡出
         float seconds = PerformSystem.Hide();
-        yield return new WaitForSeconds(seconds);
+        yield return new WaitForSeconds(seconds+0.1f);
         //淡出结束,淡入
         seconds = PerformSystem.FadeIn();
         BackGround.SetActive(false);
@@ -126,5 +126,6 @@ public class SceneLoader : MonoBehaviour {
     {
         SceneManager.LoadScene("LoadingScene", LoadSceneMode.Additive);
         isLoaded = false;
+        fakeProgress = 0;
     }
 }

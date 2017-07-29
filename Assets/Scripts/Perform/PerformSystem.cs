@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// 演出系统
@@ -12,6 +13,10 @@ public class PerformSystem : MonoBehaviour
     /************************
      *   以下是全局的属性   *
      ************************/
+    /// <summary>
+    ///  全局高度缩放指数，当前分辨率高度/1080
+    /// </summary>
+    static public float scaleGlobal = 1;
     /// <summary>
     /// 主相机，别调这个参数，没用的
     /// </summary>
@@ -41,6 +46,14 @@ public class PerformSystem : MonoBehaviour
     /// 当前存在的黑幕
     /// </summary>
     static private GameObject currentBlackBoard;
+    /// <summary>
+    /// 文本实例
+    /// </summary>
+    static public GameObject textObject;
+    /// <summary>
+    /// 当前游戏场景
+    /// </summary>
+    static private string currentGameScene;
 
 
     /************************
@@ -51,10 +64,12 @@ public class PerformSystem : MonoBehaviour
     /// </summary>
     static public void PerformInit()
     {
-        blackBoard = GameObject.FindGameObjectWithTag("GameSystem").GetComponent<GameSystem>().blackBoard;
+        scaleGlobal = Screen.height / 1080f;
+        print("scaleGloabal = " + scaleGlobal);
+        //计算黑幕高度缩放值
         float heightScale = mainCamera.GetComponent<Camera>().orthographicSize * 100 * 2;
+        //缩放赋值
         blackBoard.transform.localScale = new Vector3(heightScale * Screen.width / Screen.height, heightScale, 1);
-        Debug.Log("游戏开始啦!");
     }
 
 
@@ -87,7 +102,34 @@ public class PerformSystem : MonoBehaviour
         Destroy(toDestroy);
         yield return 0;
     }
-
+    /// <summary>
+    /// 世界坐标转换为相对屏幕坐标
+    /// </summary>
+    /// <param name="world"></param>
+    /// <returns></returns>
+    static private Vector2 WorldToCanvas(Vector2 world)
+    {
+        Vector2 middlePoint = mainCamera.transform.position;
+        return (world - middlePoint) * Screen.height / 2 / mainCamera.GetComponent<Camera>().orthographicSize;
+    }
+    /// <summary>
+    /// 淡入淡出文本框
+    /// </summary>
+    /// <param name="inS">淡入时间</param>
+    /// <param name="outS">淡出时间</param>
+    /// <returns></returns>
+    static private IEnumerator FadeText(GameObject tOb, float seconds, float inS = 0.5f, float outS = 1.0f)
+    {
+        TextFade fade = tOb.AddComponent<TextFade>();
+        fade.FadeIn(inS);
+        yield return new WaitForSeconds(inS);
+        yield return new WaitForSeconds(seconds - inS - outS > 0 ? seconds - inS - outS : 0);
+        TextFade fade2 = tOb.AddComponent<TextFade>();
+        fade2.FadeOut(outS);
+        yield return new WaitForSeconds(outS+0.1f);
+        Destroy(tOb);
+        yield return 0;
+    }
 
 
     /************************
@@ -197,6 +239,7 @@ public class PerformSystem : MonoBehaviour
     /// <param name="seconds"></param>
     static public float FadeIn(float seconds = 0.8f)
     {
+        print("Faded In");
         if (currentBlackBoard == null) currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity, mainCamera.transform);
         FadeOut(currentBlackBoard, seconds);
         return seconds;
@@ -219,6 +262,7 @@ public class PerformSystem : MonoBehaviour
     /// <param name="seconds"></param>
     static public float Hide(float seconds = 0.8f)
     {
+        print("Hided");
         if (currentBlackBoard != null) Destroy(currentBlackBoard);
         currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity, mainCamera.transform);
         FadeIn(currentBlackBoard, seconds);
@@ -233,6 +277,55 @@ public class PerformSystem : MonoBehaviour
     {
         SceneLoader.toUnload = from;
         SceneLoader.toLoad = to;
+        currentGameScene = to;
         SceneLoader.Load();
+    }
+    /// <summary>
+    /// 智能切换场景
+    /// </summary>
+    /// <param name="to"></param>
+    static public void LoadScene(string to)
+    {
+        LoadSceneFromTo(currentGameScene, to);
+    }
+    /// <summary>
+    /// 自定义显示文字
+    /// </summary>
+    /// <param name="text">文字内容</param>
+    /// <param name="seconds">文字持续秒数</param>
+    /// <param name="fontSize">字体大小</param>
+    /// <param name="apl">一行多少字</param>
+    /// <param name="canvasPosition">相对屏幕位置</param>
+    /// <param name="color">文字颜色</param>
+    static public void ShowText(string text, float seconds, int fontSize, int apl, Vector2 canvasPosition, Color color, float inS = 0.5f, float outS = 1.0f)
+    {
+        GameObject tOb = GameObject.Instantiate(textObject, canvasPosition, Quaternion.identity, GameObject.FindGameObjectWithTag("UICanvas").transform);
+        //生成完毕完毕，开始初始化赋值
+        Text t = tOb.GetComponent<Text>();
+        t.color = color;
+        t.fontSize = fontSize;
+        t.text = text;
+        tOb.GetComponent<RectTransform>().anchoredPosition = canvasPosition * scaleGlobal;
+        tOb.GetComponent<RectTransform>().sizeDelta = new Vector2(apl * fontSize, 200);
+        tOb.GetComponent<RectTransform>().localScale = new Vector3(scaleGlobal, scaleGlobal, 1);
+        mainCamera.StartCoroutine(FadeText(tOb, seconds, inS, outS));
+    }
+    /// <summary>
+    /// 显示演出文字
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="seconds"></param>
+    static public void ShowTextToPerform(string text, float seconds)
+    {
+        ShowText(text, seconds, 40, 20, Vector2.zero, Color.white);
+    }
+    /// <summary>
+    /// 显示演出文字
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="seconds"></param>
+    static public void ShowTextToPerform(string text, float seconds, Vector2 canvasPosition)
+    {
+        ShowText(text, seconds, 40, 20, canvasPosition, Color.white);
     }
 }

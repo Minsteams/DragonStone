@@ -32,7 +32,7 @@ public class SaveSystem : MonoBehaviour
     static public void Save(int dataNum)
     {
         PackData();
-        BinaryWriter bw = new BinaryWriter(File.Open(Application.dataPath + "/test" + dataNum + ".sav", FileMode.Create));
+        BinaryWriter bw = new BinaryWriter(File.Open(Application.dataPath + "/Save" + dataNum + ".sav", FileMode.Create));
         bw.Write(StructToBytes(saveData, Marshal.SizeOf(saveData)));
         bw.Close();
     }
@@ -42,7 +42,7 @@ public class SaveSystem : MonoBehaviour
     /// </summary>
     static public void Load(int dataNum)
     {
-        BinaryReader br= new BinaryReader(File.Open(Application.dataPath + "/test" + dataNum + ".sav", FileMode.Open));
+        BinaryReader br= new BinaryReader(File.Open(Application.dataPath + "/Save" + dataNum + ".sav", FileMode.Open));
         Byte[] buffer=new Byte[Marshal.SizeOf(saveData)];
         br.Read(buffer, 0, Marshal.SizeOf(saveData));
         saveData = (SaveData)ByteToStruct(buffer, typeof(SaveData));
@@ -97,5 +97,21 @@ public class SaveSystem : MonoBehaviour
     static private void ApplyData()
     {
 
+    }
+    /// <summary>
+    /// 返回当前存档的最高天数
+    /// </summary>
+    /// <returns></returns>
+    static public int LoadDayNum()
+    {
+        int day = 0;
+        //检测文件是否存在
+        int d = 1;
+        while(Directory.Exists(Application.dataPath + "/Save" + d + ".sav"))
+        {
+            day = d;
+            d++;
+        }
+        return day;
     }
 }
