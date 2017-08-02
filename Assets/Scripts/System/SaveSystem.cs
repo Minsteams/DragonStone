@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Linq;
-using System;
+using UnityEngine;
 
 /// <summary>
 /// 用于提供存档的方法
@@ -12,7 +9,7 @@ using System;
 public class SaveSystem : MonoBehaviour
 {
     /// <summary>
-    /// 包含所有需要存储的数据
+    /// 包含所有需要存储的数据的类
     /// </summary>
     [Serializable]
     public struct SaveData
@@ -23,6 +20,9 @@ public class SaveSystem : MonoBehaviour
         public int d;
         public string e;
     }
+    /// <summary>
+    /// 包含所有需要存储的数据
+    /// </summary>
     static public SaveData saveData;
 
     [ContextMenu("Save")]
@@ -31,6 +31,7 @@ public class SaveSystem : MonoBehaviour
     /// </summary>
     static public void Save(int dataNum)
     {
+        PackData();
         BinaryWriter bw = new BinaryWriter(File.Open(Application.dataPath + "/test" + dataNum + ".sav", FileMode.Create));
         bw.Write(StructToBytes(saveData, Marshal.SizeOf(saveData)));
         bw.Close();
@@ -46,6 +47,7 @@ public class SaveSystem : MonoBehaviour
         br.Read(buffer, 0, Marshal.SizeOf(saveData));
         saveData = (SaveData)ByteToStruct(buffer, typeof(SaveData));
         br.Close();
+        ApplyData();
     }
     /// <summary>
     /// 将结构体转换为Byte类型
