@@ -49,7 +49,7 @@ public class PerformSystem : MonoBehaviour
     /// <summary>
     /// 文本实例
     /// </summary>
-    static public GameObject textObject;
+    static public GameObject textPerformObject;
     /// <summary>
     /// 当前游戏场景
     /// </summary>
@@ -64,6 +64,8 @@ public class PerformSystem : MonoBehaviour
     /// </summary>
     static public void PerformInit()
     {
+        textPerformObject = Resources.Load("System/PerformText", typeof(GameObject)) as GameObject;
+        blackBoard = Resources.Load("System/BlackBoard", typeof(GameObject)) as GameObject;
         scaleGlobal = Screen.height / 1080f;
         print("scaleGloabal = " + scaleGlobal);
         //计算黑幕高度缩放值
@@ -96,7 +98,7 @@ public class PerformSystem : MonoBehaviour
     /// <param name="toDestroy">目标</param>
     /// <param name="seconds">延迟的时间</param>
     /// <returns></returns>
-    static private IEnumerator DestroyDelayed(Object toDestroy, float seconds)
+    static public IEnumerator DestroyDelayed(Object toDestroy, float seconds)
     {
         yield return new WaitForSeconds(seconds);
         Destroy(toDestroy);
@@ -126,7 +128,7 @@ public class PerformSystem : MonoBehaviour
         yield return new WaitForSeconds(seconds - inS - outS > 0 ? seconds - inS - outS : 0);
         TextFade fade2 = tOb.AddComponent<TextFade>();
         fade2.FadeOut(outS);
-        yield return new WaitForSeconds(outS+0.1f);
+        yield return new WaitForSeconds(outS + 0.1f);
         Destroy(tOb);
         yield return 0;
     }
@@ -141,6 +143,7 @@ public class PerformSystem : MonoBehaviour
     static public void FocusOn(float x)
     {
         mainCamera.focusPoint = new Vector2(x, mainCamera.focusPoint.y);
+        print("Focused on " + x);
     }
     /// <summary>
     /// 用于将摄像机聚焦到指定坐标
@@ -197,13 +200,13 @@ public class PerformSystem : MonoBehaviour
     /// </summary>
     /// <param name="target">物体</param>
     /// <param name="seconds">淡出经历时间【可选】</param>
-    static public float FadeIn(GameObject target, float seconds = 0.4f)
+    static public float FadeIn(GameObject target, float seconds = 0.4f, float a = 0)
     {
+ //       print("【Fade In [" + target + "] in " + seconds + " seconds to ALPHA " + a + " .】");
         Fade fo = target.GetComponent<Fade>();
         if (fo != null) Destroy(fo);
         Fade f = target.AddComponent<Fade>();
-        f = target.AddComponent<Fade>();
-        f.FadeIn(seconds);
+        f.FadeIn(seconds, a);
         return seconds;
     }
     /// <summary>
@@ -213,6 +216,7 @@ public class PerformSystem : MonoBehaviour
     /// <param name="seconds">淡出经历时间【可选】</param>
     static public float FadeOut(GameObject target, float seconds = 0.4f)
     {
+//        print("【Fade Out [" + target + "] in " + seconds + " seconds .】");
         Fade fo = target.GetComponent<Fade>();
         if (fo != null) Destroy(fo);
         Fade f = target.AddComponent<Fade>();
@@ -227,6 +231,7 @@ public class PerformSystem : MonoBehaviour
     /// <param name="seconds">淡出经历时间【可选】</param>
     static public float Hide(GameObject target, float seconds = 0.4f)
     {
+//        print("【Hide [" + target + "] in " + seconds + " seconds .】");
         Fade fo = target.GetComponent<Fade>();
         if (fo != null) Destroy(fo);
         Fade f = target.AddComponent<Fade>();
@@ -234,12 +239,23 @@ public class PerformSystem : MonoBehaviour
         return seconds;
     }
     /// <summary>
+    /// 使一个带spriteRenderer的物体立刻隐藏
+    /// </summary>
+    /// <param name="target">物体</param>
+    static public void HideImmediately(GameObject target)
+    {
+        Renderer sr = target.GetComponent<Renderer>();
+        Color c = sr.material.GetColor("_Color");
+        c.a = 0;
+        sr.material.SetColor("_Color", c);
+    }
+    /// <summary>
     /// 全屏淡入
     /// </summary>
     /// <param name="seconds"></param>
     static public float FadeIn(float seconds = 0.8f)
     {
-        print("Faded In");
+        print("【Faded In】");
         if (currentBlackBoard == null) currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity, mainCamera.transform);
         FadeOut(currentBlackBoard, seconds);
         return seconds;
@@ -262,7 +278,7 @@ public class PerformSystem : MonoBehaviour
     /// <param name="seconds"></param>
     static public float Hide(float seconds = 0.8f)
     {
-        print("Hided");
+        print("【Hided】");
         if (currentBlackBoard != null) Destroy(currentBlackBoard);
         currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity, mainCamera.transform);
         FadeIn(currentBlackBoard, seconds);
@@ -289,43 +305,98 @@ public class PerformSystem : MonoBehaviour
         LoadSceneFromTo(currentGameScene, to);
     }
     /// <summary>
-    /// 自定义显示文字
+    /// 使一个文本以淡入的形式出现
     /// </summary>
-    /// <param name="text">文字内容</param>
-    /// <param name="seconds">文字持续秒数</param>
-    /// <param name="fontSize">字体大小</param>
-    /// <param name="apl">一行多少字</param>
-    /// <param name="canvasPosition">相对屏幕位置</param>
-    /// <param name="color">文字颜色</param>
-    static public void ShowText(string text, float seconds, int fontSize, int apl, Vector2 canvasPosition, Color color, float inS = 0.5f, float outS = 1.0f)
+    /// <param name="target">物体</param>
+    /// <param name="seconds">淡出经历时间【可选】</param>
+    static public float FadeInText(GameObject target, float seconds = 0.2f)
     {
-        GameObject tOb = GameObject.Instantiate(textObject, canvasPosition, Quaternion.identity, GameObject.FindGameObjectWithTag("UICanvas").transform);
+        print("【Fade In [" + target + "] in " + seconds + " seconds .】");
+        TextFade fo = target.GetComponent<TextFade>();
+        if (fo != null) Destroy(fo);
+        TextFade f = target.AddComponent<TextFade>();
+        f.FadeIn(seconds);
+        return seconds;
+    }
+    /// <summary>
+    /// 使一个文本淡出但不摧毁
+    /// </summary>
+    /// <param name="target">物体</param>
+    /// <param name="seconds">淡出经历时间【可选】</param>
+    static public float HideText(GameObject target, float seconds = 0.2f)
+    {
+        print("【Hide [" + target + "] in " + seconds + " seconds .】");
+        TextFade fo = target.GetComponent<TextFade>();
+        if (fo != null) Destroy(fo);
+        TextFade f = target.AddComponent<TextFade>();
+        f.FadeOut(seconds);
+        return seconds;
+    }
+    /// <summary>
+    /// 使一个文本淡出并摧毁
+    /// </summary>
+    /// <param name="target">物体</param>
+    /// <param name="seconds">淡出经历时间【可选】</param>
+    static public float FadeOutText(GameObject target, float seconds = 0.2f)
+    {
+        print("【Hide [" + target + "] in " + seconds + " seconds .】");
+        TextFade fo = target.GetComponent<TextFade>();
+        if (fo != null) Destroy(fo);
+        TextFade f = target.AddComponent<TextFade>();
+        f.FadeOut(seconds);
+        mainCamera.StartCoroutine(DestroyDelayed(target, seconds + 0.1f));
+        return seconds;
+    }
+    /// <summary>
+    /// 显示演出文字持续seconds
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="seconds"></param>
+    static public void ShowTextToPerformForSeconds(string text, float seconds, Vector2 canvasPosition = default(Vector2), float scale = 0.7f)
+    {
+        ShowTextToPerformForSeconds(text, seconds, Color.white, canvasPosition, scale);
+    }
+    /// <summary>
+    /// 显示演出文字持续seconds
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="seconds"></param>
+    static public void ShowTextToPerformForSeconds(string text, float seconds, Color color, Vector2 canvasPosition = default(Vector2), float scale = 0.7f)
+    {
+        GameObject tOb = GameObject.Instantiate(textPerformObject, canvasPosition, Quaternion.identity, GameObject.FindGameObjectWithTag("PerformCanvas").transform);
         //生成完毕完毕，开始初始化赋值
         Text t = tOb.GetComponent<Text>();
-        t.color = color;
-        t.fontSize = fontSize;
         t.text = text;
-        tOb.GetComponent<RectTransform>().anchoredPosition = canvasPosition * scaleGlobal;
-        tOb.GetComponent<RectTransform>().sizeDelta = new Vector2(apl * fontSize, 200);
-        tOb.GetComponent<RectTransform>().localScale = new Vector3(scaleGlobal, scaleGlobal, 1);
-        mainCamera.StartCoroutine(FadeText(tOb, seconds, inS, outS));
+        t.color = color;
+        tOb.GetComponent<RectTransform>().localScale = new Vector3(scale, scale, 1);
+        tOb.GetComponent<RectTransform>().sizeDelta /= scale;
+        mainCamera.StartCoroutine(FadeText(tOb, seconds));
     }
     /// <summary>
     /// 显示演出文字
     /// </summary>
     /// <param name="text"></param>
     /// <param name="seconds"></param>
-    static public void ShowTextToPerform(string text, float seconds)
+    static public GameObject ShowTextToPerform(string text, float seconds, Color color, Vector2 canvasPosition = default(Vector2), float scale = 0.7f)
     {
-        ShowText(text, seconds, 40, 20, Vector2.zero, Color.white);
+        GameObject tOb = GameObject.Instantiate(textPerformObject, canvasPosition, Quaternion.identity, GameObject.FindGameObjectWithTag("PerformCanvas").transform);
+        //生成完毕完毕，开始初始化赋值
+        Text t = tOb.GetComponent<Text>();
+        t.text = text;
+        t.color = color;
+        tOb.GetComponent<RectTransform>().localScale = new Vector3(scale, scale, 1);
+        tOb.GetComponent<RectTransform>().sizeDelta /= scale;
+        FadeInText(tOb, seconds);
+        return tOb;
     }
     /// <summary>
     /// 显示演出文字
     /// </summary>
     /// <param name="text"></param>
     /// <param name="seconds"></param>
-    static public void ShowTextToPerform(string text, float seconds, Vector2 canvasPosition)
+    static public GameObject ShowTextToPerform(string text, float seconds = 0.5f, Vector2 canvasPosition = default(Vector2), float scale = 0.7f)
     {
-        ShowText(text, seconds, 40, 20, canvasPosition, Color.white);
+        return ShowTextToPerform(text, seconds, Color.white, canvasPosition, scale);
     }
+
 }

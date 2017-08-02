@@ -17,7 +17,7 @@ public class Fade : MonoBehaviour
     float originalAlpha = 1;
     string colorName = "_Color";
     Color c;
-    
+
     void Update()
     {
         if (isFading)
@@ -31,13 +31,14 @@ public class Fade : MonoBehaviour
             }
             c.a = originalAlpha * (ifFadeIn ? bili : 1 - bili);
             GetComponent<Renderer>().material.SetColor(colorName, c);
+
             if (isOver) Destroy(this);
         }
     }
-    public void FadeIn(float seconds)
+    public void FadeIn(float seconds, float a = 0)
     {
         fadeSeconds = seconds;
-        FadeInit(true);
+        FadeInit(true, a);
         c.a = 0;
         GetComponent<Renderer>().material.SetColor(colorName, c);
     }
@@ -46,11 +47,11 @@ public class Fade : MonoBehaviour
         fadeSeconds = seconds;
         FadeInit(false);
     }
-    void FadeInit(bool ifIn)
+    void FadeInit(bool ifIn, float a = 0)
     {
         ifFadeIn = ifIn;
         c = GetComponent<Renderer>().material.GetColor(colorName);
-        originalAlpha = c.a;
+        originalAlpha = a > 0.01f ? a : (c.a > 0.01f ? c.a : 1);
         time = 0;
         isFading = true;
     }
