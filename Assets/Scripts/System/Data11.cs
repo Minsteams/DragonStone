@@ -10,4 +10,6 @@ public class Data11 : MonoBehaviour
     {
         GameSystem.dailyData11 = data;
     }
+
+    bool[] isEventDone = new bool[10];
 }
