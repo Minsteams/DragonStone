@@ -11,10 +11,12 @@ using UnityEngine;
 public class HauntableObject : MonoBehaviour {
     [Header("【这个组件用来标记可被附身的物体】")]
     public bool isHauntable = true;
+    [Header("【可选，物体编号】")]
+    public int Num;
 
     private void OnMouseOver()
     {
-        if (Input.GetMouseButtonDown(1) && isHauntable)
+        if (Input.GetMouseButtonDown(1) && isHauntable && GameSystem.isInteractingAllowed)
         {
             HauntSystem.Haunt(this);
         }
