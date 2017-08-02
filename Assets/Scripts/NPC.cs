@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// NPC父类
@@ -24,26 +25,61 @@ public class NPC : MonoBehaviour {
     /// </summary>
     protected Animator animator;
     protected SpriteRenderer spriteRenderer;
+    protected GameObject speakText;
     /// <summary>
     /// 当前状态
     /// </summary>
     private NPCState currentState;
 
+
+    public void Speak(string word)
+    {
+        GameObject text = Resources.Load("System/SpeakText") as GameObject;
+        speakText = GameObject.Instantiate(text, transform);
+        speakText.GetComponent<Text>().text = word;
+        PerformSystem.FadeInText(speakText);
+    }
+    [ContextMenu("ShutUp")]
+    public void ShutUp()
+    {
+        if (speakText != null)
+            PerformSystem.FadeOutText(speakText);
+    }
+    public void WalkTo(float x)
+    {
+        StartCoroutine(walkTo(x));
+    }
+    IEnumerator walkTo(float x)
+    {
+        float distance = x - transform.position.x;
+        yield return new WaitForEndOfFrame();
+        if ((distance < 0.1f && distance > -0.1f))
+        {
+            v = 0;
+            yield return 0;
+        }
+        else if (distance < 0.5f && distance > -0.5f)
+        {
+            v -= 0.05f * (distance > 0 ? 1 : -1);
+            yield return walkTo(x);
+        }
+        else
+        {
+            v += 0.05f * (distance > 0 ? 1 : -1);
+            if (v > 1) v = 1;
+            if (v < -1) v = -1;
+            yield return walkTo(x);
+        }
+    }
     private void Awake()
     {
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         ChangeState(new StandState());
     }
-
-    public void WalkTo(float x)
+    private void Update()
     {
-
-    }
-
-    virtual public void Update()
-    {
-        v = Input.GetAxis("Horizontal");
+ //       v = Input.GetAxis("Horizontal");
         transform.position += Vector3.right * v * speed * Time.deltaTime;
         currentState.Excute(this);
     }
@@ -77,6 +113,26 @@ public class NPC : MonoBehaviour {
             npc.animator.SetBool("isWalking", false);
         }
     }
+
+
+
+
+
+
+
+
+    [ContextMenu("Speak")]
+    void test1()
+    {
+        Speak("我是豆子！");
+    }
+    [ContextMenu("Walk to 10")]
+    void test()
+    {
+        WalkTo(10);
+    }
+
+
 }
 public class NPCState
 {

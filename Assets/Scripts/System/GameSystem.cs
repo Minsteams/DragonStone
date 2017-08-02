@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// 核心游戏数据
@@ -79,7 +80,7 @@ public class GameSystem : MonoBehaviour
     [ContextMenu("Init")]//不知道为啥这个指令没用，也许是静态的原因
     static void GameInit()
     {
-
+  //      SceneManager.LoadScene("Basic");
     }
     private void Awake()
     {
@@ -386,5 +387,17 @@ public class GameSystem : MonoBehaviour
     void rCurrentTime()
     {
         print("Current Time:" + currentTime);
+    }
+}
+
+public class MyEvent
+{
+    public virtual bool isTrigged()
+    {
+        return false;
+    }
+    public virtual IEnumerator Excute(bool[] isDone)
+    {
+        yield return 0;
     }
 }
