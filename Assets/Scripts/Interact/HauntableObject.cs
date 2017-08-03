@@ -13,6 +13,8 @@ public class HauntableObject : MonoBehaviour {
     public bool isHauntable = true;
     [Header("【可选，物体编号】")]
     public int Num;
+    [Header("附身后摄像机相对这个物体的x坐标")]
+    public float cameraX;
 
     private void OnMouseOver()
     {

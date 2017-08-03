@@ -5,8 +5,15 @@ using UnityEngine;
 /// <summary>
 /// 附身系统
 /// </summary>
-public class HauntSystem : MonoBehaviour {
-    static HauntableObject currentHauntedObject=null;//当前被附身的物体
+public class HauntSystem : MonoBehaviour
+{
+    /// <summary>
+    /// 当前被附身的物体
+    /// </summary>
+    static public HauntableObject currentHauntedObject = null;
+    /// <summary>
+    ///当前被附身的物体编号
+    /// </summary>
     static public int Num;
 
     /// <summary>
@@ -17,6 +24,6 @@ public class HauntSystem : MonoBehaviour {
     {
         currentHauntedObject = target;
         Num = target.Num;
-        PerformSystem.FocusOn(currentHauntedObject.transform.position.x);
+        PerformSystem.FocusOn(currentHauntedObject.transform.position.x + currentHauntedObject.cameraX);
     }
 }

@@ -17,6 +17,7 @@ public class CameraController : MonoBehaviour {
     [Header("焦点")]
     public Vector2 focusPoint = new Vector2(0, 0);
 
+    public Transform target;
     //初始化，与演出系统建立联系
     private void Awake()
     {
@@ -24,6 +25,7 @@ public class CameraController : MonoBehaviour {
     }
     //平滑移动
     void Update () {
+        if (target != null) focusPoint.x = target.position.x;
         transform.position += smoothness * (new Vector3(focusPoint.x, focusPoint.y, transform.position.z) - transform.position);
 	}
 }

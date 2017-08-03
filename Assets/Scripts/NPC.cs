@@ -7,10 +7,13 @@ using UnityEngine.UI;
 /// NPC父类
 /// </summary>
 [DisallowMultipleComponent]
+[RequireComponent(typeof(Animator))]
+[AddComponentMenu("演出/NPC")]
 public class NPC : MonoBehaviour {
     [Header("以下是NPC通用属性")]
     [Header("行走速度，Units/Seconds")]
-    public float speed = 4;
+    [SerializeField]
+    float speed = 4;
     /// <summary>
     /// 脸是否初始朝向左
     /// </summary>
@@ -23,7 +26,7 @@ public class NPC : MonoBehaviour {
     /// <summary>
     /// 对应的animator
     /// </summary>
-    protected Animator animator;
+    public Animator animator;
     protected SpriteRenderer spriteRenderer;
     protected GameObject speakText;
     /// <summary>
@@ -32,6 +35,10 @@ public class NPC : MonoBehaviour {
     private NPCState currentState;
 
 
+    public void Turn()
+    {
+        spriteRenderer.flipX = !spriteRenderer.flipX;
+    }
     public void Speak(string word)
     {
         GameObject text = Resources.Load("System/SpeakText") as GameObject;
@@ -49,16 +56,17 @@ public class NPC : MonoBehaviour {
     {
         StartCoroutine(walkTo(x));
     }
-    IEnumerator walkTo(float x)
+    public IEnumerator walkTo(float x)
     {
+        yield return 1;
+
         float distance = x - transform.position.x;
-        yield return new WaitForEndOfFrame();
-        if ((distance < 0.1f && distance > -0.1f))
+        if (distance< 0.1f && distance>-0.1f)
         {
             v = 0;
             yield return 0;
         }
-        else if (distance < 0.5f && distance > -0.5f)
+        else if (Mathf.Abs(distance) < Mathf.Abs(v / 2))
         {
             v -= 0.05f * (distance > 0 ? 1 : -1);
             yield return walkTo(x);
@@ -71,6 +79,11 @@ public class NPC : MonoBehaviour {
             yield return walkTo(x);
         }
     }
+
+
+
+
+
     private void Awake()
     {
         animator = GetComponent<Animator>();

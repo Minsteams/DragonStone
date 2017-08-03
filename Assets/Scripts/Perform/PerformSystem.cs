@@ -37,11 +37,15 @@ public class PerformSystem : MonoBehaviour
     /// <summary>
     /// 已有音效表列
     /// </summary>
-    static private List<sound> soundList = null;
+    static private List<sound> soundList = new List<sound>();
     /// <summary>
     /// 黑幕样例
     /// </summary>
     static public GameObject blackBoard;
+    /// <summary>
+    /// 黑洞样例
+    /// </summary>
+    static public GameObject blackHole;
     /// <summary>
     /// 当前存在的黑幕
     /// </summary>
@@ -66,6 +70,7 @@ public class PerformSystem : MonoBehaviour
     {
         textPerformObject = Resources.Load("System/PerformText", typeof(GameObject)) as GameObject;
         blackBoard = Resources.Load("System/BlackBoard", typeof(GameObject)) as GameObject;
+        blackHole = Resources.Load("System/BlackHole", typeof(GameObject)) as GameObject;
         scaleGlobal = Screen.height / 1080f;
         print("scaleGloabal = " + scaleGlobal);
         //计算黑幕高度缩放值
@@ -142,6 +147,7 @@ public class PerformSystem : MonoBehaviour
     /// </summary>
     static public void FocusOn(float x)
     {
+        mainCamera.target = null;
         mainCamera.focusPoint = new Vector2(x, mainCamera.focusPoint.y);
         print("Focused on " + x);
     }
@@ -150,10 +156,12 @@ public class PerformSystem : MonoBehaviour
     /// </summary>
     static public void FocusOn(float x, float y)
     {
+        mainCamera.target = null;
         mainCamera.focusPoint = new Vector2(x, y);
     }
     static public void FocusOn(Vector2 point)
     {
+        mainCamera.target = null;
         mainCamera.focusPoint = point;
     }
     /// <summary>
@@ -161,7 +169,12 @@ public class PerformSystem : MonoBehaviour
     /// </summary>
     static public void FocusOn(Vector3 point)
     {
+        mainCamera.target = null;
         mainCamera.focusPoint = point;
+    }
+    static public void FocusOn(Transform target)
+    {
+        mainCamera.target = target;
     }
     /// <summary>
     /// 用于添加音效

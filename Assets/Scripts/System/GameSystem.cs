@@ -68,6 +68,20 @@ public class GameSystem : MonoBehaviour
     /// 时间流逝速度，小时/秒
     /// </summary>
     public float timeSpeed;
+    /// <summary>
+    /// 判断是否处于时间区间内
+    /// </summary>
+    /// <param name="from"></param>
+    /// <param name="to"></param>
+    /// <returns></returns>
+    static public bool isTimeIn(float from, float to)
+    {
+        return currentTime >= from && currentTime <= to;
+    }
+    /// <summary>
+    /// 条件
+    /// </summary>
+    static public bool[] condition = new bool[16];
 
 
     /************************
@@ -77,18 +91,25 @@ public class GameSystem : MonoBehaviour
     /// 游戏初始化
     /// </summary>
     [RuntimeInitializeOnLoadMethod]
-    [ContextMenu("Init")]//不知道为啥这个指令没用，也许是静态的原因
     static void GameInit()
     {
   //      SceneManager.LoadScene("Basic");
     }
+    [Header("用于测试场景")]
+    [Range(0,1)]
+    public int sceneNum;
     private void Awake()
     {
         //初始化演出
         system = gameObject;
         PerformSystem.PerformInit();
         //初始化状态机并在状态机中进一步初始化
-        ChangeState(new InitState());
+        switch (sceneNum)
+        {
+            case 0: ChangeState(new InitState()); break;
+            case 1: ChangeState(new State14()); break;
+        }
+
     }
 
 
@@ -112,7 +133,7 @@ public class GameSystem : MonoBehaviour
     }
     private void Update()
     {
-        currentState.Excute(this);
+        if(currentState!=null) currentState.Excute(this);
     }
     /// <summary>
     /// 状态机父类
@@ -190,36 +211,7 @@ public class GameSystem : MonoBehaviour
     /// <summary>
     /// 第一天数据
     /// </summary>
-    [System.Serializable]
-    public struct DailyData10
-    {
-        [Header("拖动SceneParent到这")]
-        public Transform parent;
-        [Header("龙石标题")]
-        public GameObject title;
-        [Header("黑幕，未激活状态")]
-        public GameObject black;
-        [Header("序人")]
-        public GameObject theGuy;
-        [Header("背景")]
-        public GameObject backGround;
-        [Header("火炬")]
-        public Transform firstTorch;
-        [Header("火炬间距离")]
-        public float torchDistance;
-        [Header("菜单")]
-        public GameObject menu;
-        [Header("提示文字")]
-        public Text tipWord1;
-        public Text tipWord2;
-        [Header("菜单第一部分")]
-        public GameObject Menu1;
-        [Header("间幕【未激活】")]
-        public GameObject black2;
-        [Header("菜单第二部分【未激活】")]
-        public GameObject Menu2;
-    }
-    public static DailyData10 dailyData10;
+    public static Data10.DailyData10 dailyData10;
     /// <summary>
     /// 开头演出
     /// </summary>
@@ -341,23 +333,36 @@ public class GameSystem : MonoBehaviour
     /// <summary>
     /// 第一天数据
     /// </summary>
-    [System.Serializable]
-    public struct DailyData11
-    {
-
-    }
-    public static DailyData11 dailyData11;
+    public static Data11.DailyData11 dailyData11;
     class State14 : State
     {
         public override void Enter(GameSystem system)
         {
             PerformSystem.LoadScene("Scene11");
-            currentTime = 6;
+            currentTime = 0;
+        }
+        public override void Excute(GameSystem system)
+        {
+            currentTime += system.timeSpeed * Time.deltaTime;
+            if (HauntSystem.currentHauntedObject != null) system.ChangeState(new State15());
+        }
+    }
+    class State15 : State
+    {
+        public override void Enter(GameSystem system)
+        {
+            system.LoadCoroutine(system.Scene15());
         }
         public override void Excute(GameSystem system)
         {
             currentTime += system.timeSpeed * Time.deltaTime;
         }
+    }
+    IEnumerator Scene15()
+    {
+        yield return dailyData11.DouZi.walkTo(16);
+        PerformSystem.FadeOut(dailyData11.DouZi.gameObject);
+        PerformSystem.FadeOut(dailyData11.Bowl);
     }
 
     /************************
@@ -388,16 +393,13 @@ public class GameSystem : MonoBehaviour
     {
         print("Current Time:" + currentTime);
     }
+    [Header("用于设置时间")]
+    [ContextMenuItem("SetTime", "SetTime")]
+    public float timeToSet;
+    void SetTime()
+    {
+        currentTime = timeToSet;
+    }
 }
 
-public class MyEvent
-{
-    public virtual bool isTrigged()
-    {
-        return false;
-    }
-    public virtual IEnumerator Excute(bool[] isDone)
-    {
-        yield return 0;
-    }
-}
+
