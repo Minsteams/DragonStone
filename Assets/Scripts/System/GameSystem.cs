@@ -288,20 +288,27 @@ public class GameSystem : MonoBehaviour
     {
         public override void Enter(GameSystem system)
         {
-            dailyData10.menu.SetActive(true);
-            dailyData10.Menu1.SetActive(true);
-            dailyData10.Menu2.SetActive(false);
-            PerformSystem.FadeIn(1);
-            PerformSystem.FocusOn(dailyData10.menu.transform.position);
-            PerformSystem.Hide(dailyData10.backGround, 0.3f);
-            tributeNum = 0;
-            tipWord1 = dailyData10.tipWord1;
-            tipWord2 = dailyData10.tipWord2;
+            system.StartCoroutine(system.Scene12());
         }
         public override void Excute(GameSystem system)
         {
             if (tributeNum != 0) system.ChangeState(new State13());
         }
+    }
+    IEnumerator Scene12()
+    {
+        dailyData10.menu.SetActive(true);
+        dailyData10.Menu1.SetActive(true);
+        dailyData10.Menu2.SetActive(false);
+        float s = PerformSystem.Hide();
+        yield return new WaitForSeconds(s);
+        PerformSystem.FocusOn(dailyData10.menu.transform.position);
+        PerformSystem.Hide(dailyData10.backGround, 0.3f);
+        yield return new WaitForSeconds(1);
+        PerformSystem.FadeIn(1);
+        tributeNum = 0;
+        tipWord1 = dailyData10.tipWord1;
+        tipWord2 = dailyData10.tipWord2;
     }
     class State13 : State
     {
@@ -363,6 +370,30 @@ public class GameSystem : MonoBehaviour
         yield return dailyData11.DouZi.walkTo(16);
         PerformSystem.FadeOut(dailyData11.DouZi.gameObject);
         PerformSystem.FadeOut(dailyData11.Bowl);
+        while (true)
+        {
+            yield return new WaitForSeconds(15);
+            string words = "";
+            switch ((int)Random.Range(0, 5))
+            {
+                case 0:
+                    words = "变喽……时代变喽……";
+                    break;
+                case 1:
+                    words = "新鲜事物多喽……老头子都跟不上喽……";
+                    break;
+                case 2:
+                    words = "还是以前的日子舒服唷……";
+                    break;
+                case 3:
+                    words = "闲无事在敌楼我亮一亮琴音，我面前缺少个知音的人 ——";
+                    break;
+                case 4:
+                    words = "就剩这间戏院喽……";
+                    break;
+            }
+            yield return MyEvent.Speak(dailyData11.LaoHu, words, 5);
+        }
     }
 
     /************************

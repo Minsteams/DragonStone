@@ -68,7 +68,7 @@ public class SceneLoader : MonoBehaviour
         yield return new WaitForSeconds(1);
         if (SceneManager.GetSceneByName(toUnload).IsValid()) SceneManager.UnloadSceneAsync(toUnload);
         loadingProgress = SceneManager.LoadSceneAsync(toLoad, LoadSceneMode.Additive);
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.5f);
         if (isRapid && loadingProgress.isDone)
         {
             isLoaded = true;
@@ -134,6 +134,7 @@ public class SceneLoader : MonoBehaviour
         yield return new WaitForSeconds(seconds);
         //淡入完毕
         isRapid = true;
+        print("Over");
         SceneManager.UnloadSceneAsync("LoadingScene");
         yield return 0;
     }

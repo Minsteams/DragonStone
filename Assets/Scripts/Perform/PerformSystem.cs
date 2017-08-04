@@ -269,7 +269,7 @@ public class PerformSystem : MonoBehaviour
     static public float FadeIn(float seconds = 0.8f)
     {
         print("【Faded In】");
-        if (currentBlackBoard == null) currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity, mainCamera.transform);
+        if (currentBlackBoard == null) currentBlackBoard = GameObject.Instantiate(blackBoard, (Vector2)mainCamera.transform.position, Quaternion.identity, mainCamera.transform);
         FadeOut(currentBlackBoard, seconds);
         return seconds;
     }
@@ -280,7 +280,7 @@ public class PerformSystem : MonoBehaviour
     static public float FadeOut(float seconds = 0.8f)
     {
         if (currentBlackBoard != null) Destroy(currentBlackBoard);
-        currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity, mainCamera.transform);
+        currentBlackBoard = GameObject.Instantiate(blackBoard, (Vector2)mainCamera.transform.position, Quaternion.identity, mainCamera.transform);
         FadeIn(currentBlackBoard, seconds);
         mainCamera.StartCoroutine(DestroyDelayed(currentBlackBoard, seconds + 0.1f));
         return seconds;
@@ -293,7 +293,7 @@ public class PerformSystem : MonoBehaviour
     {
         print("【Hided】");
         if (currentBlackBoard != null) Destroy(currentBlackBoard);
-        currentBlackBoard = GameObject.Instantiate(blackBoard, mainCamera.focusPoint, Quaternion.identity, mainCamera.transform);
+        currentBlackBoard = GameObject.Instantiate(blackBoard, (Vector2)mainCamera.transform.position, Quaternion.identity, mainCamera.transform);
         FadeIn(currentBlackBoard, seconds);
         return seconds;
     }
@@ -324,7 +324,7 @@ public class PerformSystem : MonoBehaviour
     /// <param name="seconds">淡出经历时间【可选】</param>
     static public float FadeInText(GameObject target, float seconds = 1f)
     {
-        print("【Fade In [" + target + "] in " + seconds + " seconds .】");
+    //    print("【Fade In [" + target + "] in " + seconds + " seconds .】");
         TextFade fo = target.GetComponent<TextFade>();
         if (fo != null) Destroy(fo);
         TextFade f = target.AddComponent<TextFade>();
@@ -338,7 +338,7 @@ public class PerformSystem : MonoBehaviour
     /// <param name="seconds">淡出经历时间【可选】</param>
     static public float HideText(GameObject target, float seconds = 0.5f)
     {
-        print("【Hide [" + target + "] in " + seconds + " seconds .】");
+    //    print("【Hide [" + target + "] in " + seconds + " seconds .】");
         TextFade fo = target.GetComponent<TextFade>();
         if (fo != null) Destroy(fo);
         TextFade f = target.AddComponent<TextFade>();
@@ -352,7 +352,7 @@ public class PerformSystem : MonoBehaviour
     /// <param name="seconds">淡出经历时间【可选】</param>
     static public float FadeOutText(GameObject target, float seconds = 0.5f)
     {
-        print("【Hide [" + target + "] in " + seconds + " seconds .】");
+    //    print("【Hide [" + target + "] in " + seconds + " seconds .】");
         TextFade fo = target.GetComponent<TextFade>();
         if (fo != null) Destroy(fo);
         TextFade f = target.AddComponent<TextFade>();
